@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Solo usuarios autenticados pueden acceder
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Verificar si es admin
+    function isAdmin() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'admin';
+    }
+
+    // Configuración de la empresa - solo admins escriben, todos leen
+    match /configuracion/{docId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // Facturas - todos los autenticados pueden leer y crear
+    match /facturas/{facturaId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if isAuth();
+    }
+
+    // Productos - todos leen, admins escriben
+    match /productos/{productoId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // Clientes - todos pueden leer y escribir
+    match /clientes/{clienteId} {
+      allow read, write: if isAuth();
+    }
+
+    // Usuarios - solo admins gestionan
+    match /usuarios/{userId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+  }
+}
