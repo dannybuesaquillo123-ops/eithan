@@ -82,9 +82,13 @@ export default function NuevaFactura() {
 
   const generarNumero = async () => {
     try {
-      const snap = await getDocs(query(collection(db, 'facturas'), orderBy('numero', 'desc'), limit(1)))
-      const ultimo = snap.docs[0]?.data()?.numero || 0
-      setNumero(ultimo + 1)
+      const snap = await getDocs(collection(db, 'facturas'))
+      let maxNumero = 0
+      snap.docs.forEach(doc => {
+        const num = parseInt(doc.data().numero, 10) || 0
+        if (num > maxNumero) maxNumero = num
+      })
+      setNumero(maxNumero + 1)
     } catch (_) { setNumero(1) }
   }
 

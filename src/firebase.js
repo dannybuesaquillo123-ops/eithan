@@ -27,15 +27,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 
-console.log('[v0] Firebase inicializado correctamente')
-console.log('[v0] Proyecto ID:', firebaseConfig.projectId)
-
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
-
-console.log('[v0] Auth:', auth)
-console.log('[v0] Firestore:', db)
-console.log('[v0] Storage:', storage)
 
 export default app

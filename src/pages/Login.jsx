@@ -19,9 +19,6 @@ export default function Login() {
       await login(form.email, form.password)
       navigate('/')
     } catch (err) {
-      console.log('[v0] Error de login:', err)
-      console.log('[v0] Error code:', err.code)
-      console.log('[v0] Error message:', err.message)
       const msgs = {
         'auth/user-not-found':   'Usuario no encontrado',
         'auth/wrong-password':   'Contraseña incorrecta',
@@ -29,7 +26,7 @@ export default function Login() {
         'auth/too-many-requests':'Demasiados intentos. Espera un momento',
         'auth/invalid-credential': 'Credenciales incorrectas',
       }
-      setError(msgs[err.code] || 'Error al iniciar sesión: ' + err.code)
+      setError(msgs[err.code] || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }

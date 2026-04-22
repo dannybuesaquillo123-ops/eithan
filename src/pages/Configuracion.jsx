@@ -2,13 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
-import { Save, Upload, Building2, User, Plus, Trash2, Check } from 'lucide-react'
+import { useTheme } from '../contexts/ThemeContext'
+import { Save, Upload, Building2, User, Plus, Trash2, Check, Palette } from 'lucide-react'
 import { collection, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
 
 const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 text-sm text-slate-800 transition-all bg-white"
 
 export default function Configuracion() {
   const { isAdmin, userData, user } = useAuth()
+  const { theme, setTheme, saveTheme, presetThemes, applyPreset } = useTheme()
   const [config, setConfig] = useState({
     empresa: '', nit: '', direccion: '', telefono: '', email: '', ciudad: '',
     instagram: '', whatsapp: '', facebook: '', website: '', logo: '',
@@ -16,6 +18,7 @@ export default function Configuracion() {
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
+  const [themeSaved, setThemeSaved] = useState(false)
   const fileRef = useRef(null)
 
   // Usuarios
@@ -50,6 +53,22 @@ export default function Configuracion() {
       setTimeout(() => setSaved(false), 3000)
     } catch (e) { alert('Error al guardar: ' + e.message) }
     finally { setSaving(false) }
+  }
+
+  const guardarTema = async () => {
+    const success = await saveTheme(theme)
+    if (success) {
+      setThemeSaved(true)
+      setTimeout(() => setThemeSaved(false), 3000)
+    }
+  }
+
+  const handlePresetClick = (preset) => {
+    applyPreset(preset)
+  }
+
+  const handleColorChange = (key, value) => {
+    setTheme(prev => ({ ...prev, [key]: value }))
   }
 
   const handleLogo = (e) => {
@@ -165,6 +184,139 @@ export default function Configuracion() {
               <option value="MXN">MXN - Peso mexicano</option>
             </select>
           </div>
+        </div>
+      </Section>
+
+      {/* Personalizar Tema */}
+      <Section title="Personalizar Tema">
+        <div className="space-y-6">
+          {/* Temas predefinidos */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-3">Temas predefinidos</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {presetThemes.map((preset, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handlePresetClick(preset)}
+                  className="p-3 rounded-xl border-2 transition-all hover:scale-105 text-left"
+                  style={{
+                    borderColor: theme.primaryColor === preset.primary ? preset.primary : '#e2e8f0',
+                    background: theme.primaryColor === preset.primary ? `${preset.primary}10` : 'white'
+                  }}
+                >
+                  <div className="flex gap-1 mb-2">
+                    <div className="w-5 h-5 rounded-full" style={{ background: preset.primary }} />
+                    <div className="w-5 h-5 rounded-full" style={{ background: preset.sidebar }} />
+                  </div>
+                  <p className="text-xs font-medium text-slate-700 truncate">{preset.name}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Colores personalizados */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-3">Colores personalizados</label>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-slate-400 mb-1.5">Color primario</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={theme.primaryColor}
+                    onChange={(e) => handleColorChange('primaryColor', e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200"
+                  />
+                  <input
+                    type="text"
+                    value={theme.primaryColor}
+                    onChange={(e) => handleColorChange('primaryColor', e.target.value)}
+                    className={inputCls + ' flex-1'}
+                    placeholder="#f59e0b"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1.5">Color secundario</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={theme.secondaryColor}
+                    onChange={(e) => handleColorChange('secondaryColor', e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200"
+                  />
+                  <input
+                    type="text"
+                    value={theme.secondaryColor}
+                    onChange={(e) => handleColorChange('secondaryColor', e.target.value)}
+                    className={inputCls + ' flex-1'}
+                    placeholder="#d97706"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1.5">Color del sidebar</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={theme.sidebarBg}
+                    onChange={(e) => handleColorChange('sidebarBg', e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200"
+                  />
+                  <input
+                    type="text"
+                    value={theme.sidebarBg}
+                    onChange={(e) => handleColorChange('sidebarBg', e.target.value)}
+                    className={inputCls + ' flex-1'}
+                    placeholder="#0f172a"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1.5">Color acento</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={theme.accentColor}
+                    onChange={(e) => handleColorChange('accentColor', e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200"
+                  />
+                  <input
+                    type="text"
+                    value={theme.accentColor}
+                    onChange={(e) => handleColorChange('accentColor', e.target.value)}
+                    className={inputCls + ' flex-1'}
+                    placeholder="#10b981"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Vista previa */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-3">Vista previa</label>
+            <div className="flex items-center gap-4 p-4 rounded-xl" style={{ background: theme.sidebarBg }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                   style={{ background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` }}>
+                <Palette size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white text-sm font-medium">Vista previa del tema</p>
+                <p className="text-slate-400 text-xs">Asi se vera tu sidebar</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Boton guardar tema */}
+          <button
+            onClick={guardarTema}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white text-sm hover:scale-105 transition-all"
+            style={{ background: themeSaved ? '#10b981' : `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` }}
+          >
+            {themeSaved ? <Check size={15} /> : <Palette size={15} />}
+            {themeSaved ? 'Tema guardado!' : 'Guardar tema'}
+          </button>
         </div>
       </Section>
 

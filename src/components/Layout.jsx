@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import {
   LayoutDashboard, FileText, Plus, Package, Users,
   Settings, LogOut, Menu, X, ChevronRight, FileText as Logo
@@ -17,9 +18,13 @@ const navItems = [
 
 export default function Layout() {
   const { userData, logout } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  
+  const primaryGradient = `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`
+  const sidebarGradient = `linear-gradient(180deg, ${theme.sidebarBg} 0%, ${theme.sidebarBgEnd} 100%)`
 
   const handleLogout = async () => {
     await logout()
@@ -36,7 +41,7 @@ export default function Layout() {
       {/* Logo */}
       <div className="px-6 py-6 flex items-center gap-3 border-b border-white/10">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-             style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+             style={{ background: primaryGradient }}>
           <Logo size={20} className="text-slate-900" />
         </div>
         <div>
@@ -57,7 +62,7 @@ export default function Layout() {
                       ? 'text-slate-900 font-medium'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
-                  style={active ? { background: 'linear-gradient(135deg, #f59e0b, #d97706)' } : {}}>
+                  style={active ? { background: primaryGradient } : {}}>
               <item.icon size={18} className={active ? 'text-slate-900' : ''} />
               <span className="flex-1 text-sm">{item.label}</span>
               {active && <ChevronRight size={14} />}
@@ -71,7 +76,7 @@ export default function Layout() {
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-2"
              style={{ background: 'rgba(255,255,255,0.05)' }}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm text-slate-900"
-               style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+               style={{ background: primaryGradient }}>
             {(userData?.nombre || 'U')[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -92,7 +97,7 @@ export default function Layout() {
     <div className="flex h-screen overflow-hidden" style={{ background: '#f1f5f9' }}>
       {/* Sidebar desktop */}
       <aside className="hidden lg:flex w-64 shrink-0 flex-col h-full"
-             style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
+             style={{ background: sidebarGradient }}>
         <SidebarContent />
       </aside>
 
@@ -101,7 +106,7 @@ export default function Layout() {
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-72 z-10 flex flex-col slide-in"
-                 style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
+                 style={{ background: sidebarGradient }}>
             <button onClick={() => setMobileOpen(false)}
                     className="absolute top-4 right-4 text-slate-400 hover:text-white">
               <X size={20} />
@@ -122,7 +127,7 @@ export default function Layout() {
           </button>
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                 style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                 style={{ background: primaryGradient }}>
               <Logo size={14} className="text-slate-900" />
             </div>
             <span className="font-display text-slate-900">FacturApp Pro</span>
