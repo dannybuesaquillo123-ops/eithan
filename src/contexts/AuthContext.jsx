@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
   signOut,
   onAuthStateChanged
 } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, collection, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 
 const AuthContext = createContext(null)
@@ -44,12 +46,36 @@ export function AuthProvider({ children }) {
     return cred
   }
 
+  const register = async (nombre, email, password) => {
+    // El primer usuario registrado sera admin, el resto vendedores
+    let rol = 'vendedor'
+    try {
+      const usuariosSnap = await getDocs(collection(db, 'usuarios'))
+      if (usuariosSnap.empty) rol = 'admin'
+    } catch (_) {}
+
+    const cred = await createUserWithEmailAndPassword(auth, email, password)
+    if (nombre) {
+      try { await updateProfile(cred.user, { displayName: nombre }) } catch (_) {}
+    }
+
+    const nuevoUsuario = {
+      nombre: nombre || '',
+      email,
+      rol,
+      creadoEn: serverTimestamp(),
+    }
+    await setDoc(doc(db, 'usuarios', cred.user.uid), nuevoUsuario)
+    setUserData(nuevoUsuario)
+    return cred
+  }
+
   const logout = () => signOut(auth)
 
   const isAdmin = userData?.rol === 'admin'
 
   return (
-    <AuthContext.Provider value={{ user, userData, loading, login, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, userData, loading, login, register, logout, isAdmin }}>
       {!loading && children}
     </AuthContext.Provider>
   )

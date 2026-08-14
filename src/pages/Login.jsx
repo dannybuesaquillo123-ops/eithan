@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { FileText, Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, register } = useAuth()
   const navigate   = useNavigate()
-  const [form, setForm]     = useState({ email: '', password: '' })
+  const [isRegister, setIsRegister] = useState(false)
+  const [form, setForm]     = useState({ nombre: '', email: '', password: '' })
   const [showPass, setShowPass] = useState(false)
   const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,7 +17,16 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      await login(form.email, form.password)
+      if (isRegister) {
+        if (form.password.length < 6) {
+          setError('La contraseña debe tener al menos 6 caracteres')
+          setLoading(false)
+          return
+        }
+        await register(form.nombre, form.email, form.password)
+      } else {
+        await login(form.email, form.password)
+      }
       navigate('/')
     } catch (err) {
       const msgs = {
@@ -25,11 +35,19 @@ export default function Login() {
         'auth/invalid-email':    'Correo inválido',
         'auth/too-many-requests':'Demasiados intentos. Espera un momento',
         'auth/invalid-credential': 'Credenciales incorrectas',
+        'auth/email-already-in-use': 'Este correo ya está registrado',
+        'auth/weak-password': 'La contraseña es muy débil (mínimo 6 caracteres)',
       }
-      setError(msgs[err.code] || 'Error al iniciar sesión')
+      setError(msgs[err.code] || (isRegister ? 'Error al crear la cuenta' : 'Error al iniciar sesión'))
     } finally {
       setLoading(false)
     }
+  }
+
+  const toggleMode = () => {
+    setIsRegister(p => !p)
+    setError('')
+    setForm({ nombre: '', email: '', password: '' })
   }
 
   return (
@@ -83,10 +101,28 @@ export default function Login() {
 
           <div className="p-8 rounded-2xl"
                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
-            <h2 className="text-3xl font-display text-white mb-2">Bienvenido</h2>
-            <p className="text-slate-400 mb-8">Ingresa tus credenciales para continuar</p>
+            <h2 className="text-3xl font-display text-white mb-2">
+              {isRegister ? 'Crear cuenta' : 'Bienvenido'}
+            </h2>
+            <p className="text-slate-400 mb-8">
+              {isRegister ? 'Completa tus datos para registrarte' : 'Ingresa tus credenciales para continuar'}
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {isRegister && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Nombre completo</label>
+                  <input
+                    type="text"
+                    value={form.nombre}
+                    onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 outline-none transition-all"
+                    style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)' }}
+                    placeholder="Tu nombre"
+                    required
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Correo electrónico</label>
                 <input
@@ -131,9 +167,22 @@ export default function Login() {
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-semibold text-slate-900 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: loading ? '#94a3b8' : 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-                {loading ? 'Ingresando...' : 'Ingresar'}
+                {loading
+                  ? (isRegister ? 'Creando cuenta...' : 'Ingresando...')
+                  : (isRegister ? 'Crear cuenta' : 'Ingresar')}
               </button>
             </form>
+
+            <div className="text-center mt-6">
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="text-slate-400 text-sm hover:text-amber-400 transition-colors">
+                {isRegister
+                  ? '¿Ya tienes cuenta? Inicia sesión'
+                  : '¿No tienes cuenta? Regístrate'}
+              </button>
+            </div>
 
             <p className="text-center text-slate-500 text-xs mt-6">
               FacturApp Pro © {new Date().getFullYear()} · Todos los derechos reservados
