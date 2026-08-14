@@ -9,6 +9,7 @@ import NuevaFactura from './pages/NuevaFactura'
 import Productos from './pages/Productos'
 import Configuracion from './pages/Configuracion'
 import Clientes from './pages/Clientes'
+import Proveedores from './pages/Proveedores'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
@@ -27,6 +28,7 @@ function AppRoutes() {
         <Route path="facturas/editar/:id" element={<NuevaFactura />} />
         <Route path="productos" element={<Productos />} />
         <Route path="clientes" element={<Clientes />} />
+        <Route path="proveedores" element={<Proveedores />} />
         <Route path="configuracion" element={<Configuracion />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

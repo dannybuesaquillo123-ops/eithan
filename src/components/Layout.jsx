@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import {
-  LayoutDashboard, FileText, Plus, Package, Users,
+  LayoutDashboard, FileText, Plus, Package, Users, Truck,
   Settings, LogOut, Menu, X, ChevronRight, FileText as Logo
 } from 'lucide-react'
 
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/facturas/nueva',icon: Plus,             label: 'Nueva Factura' },
   { to: '/productos',     icon: Package,          label: 'Productos' },
   { to: '/clientes',      icon: Users,            label: 'Clientes' },
+  { to: '/proveedores',   icon: Truck,            label: 'Proveedores' },
   { to: '/configuracion', icon: Settings,         label: 'Configuración' },
 ]
 

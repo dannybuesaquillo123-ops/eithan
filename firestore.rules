@@ -37,6 +37,16 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
+    // Proveedores - todos pueden leer y escribir
+    match /proveedores/{proveedorId} {
+      allow read, write: if isAuth();
+    }
+
+    // Movimientos de proveedor (cuentas por pagar) - todos pueden leer y escribir
+    match /movimientos_proveedor/{movId} {
+      allow read, write: if isAuth();
+    }
+
     // Usuarios - cada usuario puede crear su propio documento al registrarse.
     // Los admins pueden gestionar todos los usuarios.
     match /usuarios/{userId} {
